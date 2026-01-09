@@ -96,4 +96,59 @@ public class UserDAO {
         } catch (Exception e) { e.printStackTrace(); }
         return 0;
     }
+
+    public Users getById(int id) {
+        Users u = null;
+        String sql = "SELECT * FROM users WHERE user_id = ?";
+
+        try (Connection c = util.KoneksiDB.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    u = new Users();
+                    u.setId(rs.getInt("user_id"));
+                    u.setNama(rs.getString("nama"));
+                    u.setUsername(rs.getString("username"));
+                    u.setEmail(rs.getString("email"));
+                    u.setPassword(rs.getString("password"));
+                    u.setRole(rs.getString("role"));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getById User: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return u;
+    }
+
+    // Tambahkan di dalam class UserDAO.java
+    public void deleteUser(int id) {
+        String sql = "DELETE FROM users WHERE user_id = ?";
+        try (Connection conn = util.KoneksiDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateUser(Users u) {
+        String sql = "UPDATE users SET nama=?, username=?, email=?, password=?, role=? WHERE user_id=?";
+        try (Connection conn = util.KoneksiDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, u.getNama());
+            ps.setString(2, u.getUsername());
+            ps.setString(3, u.getEmail());
+            ps.setString(4, u.getPassword());
+            ps.setString(5, u.getRole());
+            ps.setInt(6, u.getId());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

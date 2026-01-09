@@ -17,15 +17,30 @@ public class ScheduleServlet extends HttpServlet {
         String action = request.getParameter("action");
         ScheduleDAO sDao = new ScheduleDAO();
 
-        if ("add".equals(action)) {
+        if ("add".equals(action) || "update".equals(action)) {
             Schedules s = new Schedules();
+            
+            // Jika update, ambil ID-nya
+            if ("update".equals(action)) {
+                s.setScheduleId(Integer.parseInt(request.getParameter("id")));
+            }
+            
             s.setMovieId(Integer.parseInt(request.getParameter("movie_id")));
             s.setStudioId(Integer.parseInt(request.getParameter("studio_id")));
             s.setShowDate(Date.valueOf(request.getParameter("show_date")));
-            s.setShowTime(Time.valueOf(request.getParameter("show_time") + ":00"));
+            
+            // Tambahkan :00 jika input time hanya HH:mm agar sesuai format SQL Time
+            String timeInput = request.getParameter("show_time");
+            if (timeInput.length() == 5) timeInput += ":00"; 
+            s.setShowTime(Time.valueOf(timeInput));
+            
             s.setPrice(Double.parseDouble(request.getParameter("price")));
             
-            sDao.addSchedule(s);
+            if ("add".equals(action)) {
+                sDao.addSchedule(s);
+            } else {
+                sDao.updateSchedule(s);
+            }
         }
         
         response.sendRedirect("admin.jsp?page=schedules");
