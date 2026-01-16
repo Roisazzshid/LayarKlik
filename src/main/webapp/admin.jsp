@@ -172,6 +172,7 @@
                   <thead class="bg-slate-50 text-xs uppercase font-bold text-slate-600 border-b">
                       <tr>
                           <th class="px-6 py-4">Judul Film</th>
+                          <th class="px-6 py-4">Poster</th>
                           <th class="px-6 py-4">Genre</th>
                           <th class="px-6 py-4">Sinopsis</th>
                           <th class="px-6 py-4">Durasi</th>
@@ -184,6 +185,14 @@
                       <% for (Movies m : mDao.getAll()) { %>
                       <tr class="hover:bg-slate-50/80 transition-colors">
                           <td class="px-6 py-4 font-bold text-slate-800"><%= m.getTitle() %></td>
+                          <td class="px-6 py-4 font-bold text-slate-800">
+                            <div class="w-12 h-16 overflow-hidden rounded-lg shadow-sm border border-slate-200">
+                                <img id="preview-poster-<%= m.getId() %>" 
+                                     src="${pageContext.request.contextPath}/images/poster/<%= m.getPoster() %>" 
+                                     class="w-full h-full object-cover hover:scale-110 transition-transform duration-300" 
+                                     alt="Poster">
+                            </div>
+                          </td>
                           <td class="px-6 py-4 font-medium text-slate-500"><%= m.getGenre() %></td>
                           <td class="px-6 py-4 text-slate-500"><%= m.getSynopsis() %></td>
                           <td class="px-6 py-4 font-medium text-slate-500"><%= m.getDurationMinutes() %> Menit</td>
@@ -830,12 +839,46 @@
       <%-- ... konten modal ... --%>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
     <script>
-    function showFileName(input) {
-        const name = input.files[0].name;
-        document.getElementById('file-name').textContent = "File terpilih: " + name;
-    }
+        // 1. Fungsi untuk Modal TAMBAH (Hanya menampilkan nama file)
+        function showFileName(input) {
+            if (input.files && input.files[0]) {
+                const name = input.files[0].name;
+                document.getElementById('file-name').textContent = "File terpilih: " + name;
+            }
+        }
+
+        // 2. Fungsi untuk Modal EDIT (Menampilkan Preview Gambar + Nama File)
+        function previewImage(input, id) {
+            // Ambil elemen berdasarkan ID unik film
+            const preview = document.getElementById('preview-poster-' + id);
+            const fileName = document.getElementById('file-name-' + id);
+            const placeholder = document.getElementById('placeholder-' + id);
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    // Set source gambar ke file yang baru dipilih
+                    preview.src = e.target.result;
+
+                    // Pastikan gambar terlihat (hapus class hidden jika ada)
+                    preview.classList.remove('hidden');
+
+                    // Jika ada placeholder (ikon gambar kosong), sembunyikan
+                    if (placeholder) {
+                        placeholder.classList.add('hidden');
+                    }
+                }
+
+                // Baca file gambar
+                reader.readAsDataURL(input.files[0]);
+
+                // Ganti teks nama file
+                fileName.textContent = "File ganti: " + input.files[0].name;
+            }
+        }
     </script>
 </body>
 </html>

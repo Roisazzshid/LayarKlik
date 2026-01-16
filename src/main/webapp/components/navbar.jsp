@@ -13,6 +13,7 @@
   <a href="${pageContext.request.contextPath}/index.jsp#hero" class="hover:text-blue-500 transition">Beranda</a>
   <a href="${pageContext.request.contextPath}/index.jsp#movies" class="hover:text-blue-500 transition">Film</a>
   <a href="${pageContext.request.contextPath}/index.jsp#app-promo" class="hover:text-blue-500 transition">Aplikasi</a>
+  <a href="${pageContext.request.contextPath}/database.jsp" class="hover:text-blue-500 transition">Database</a>
   <a href="${pageContext.request.contextPath}/aboutUs.jsp" class="hover:text-blue-500 transition">About Us</a>
 </div>
 

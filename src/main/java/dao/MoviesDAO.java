@@ -100,7 +100,7 @@ public class MoviesDAO {
     }
     
     public boolean updateMovie(Movies m) {
-        String sql = "UPDATE movies SET title=?, genre=?, duration_minutes=?, release_date=?, base_price=?, synopsis=? WHERE movie_id=?";
+        String sql = "UPDATE movies SET title=?, genre=?, duration_minutes=?, release_date=?, base_price=?, synopsis=?, poster=? WHERE movie_id=?";
         try (Connection conn = KoneksiDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -110,8 +110,8 @@ public class MoviesDAO {
             ps.setDate(4, m.getReleaseDate());
             ps.setDouble(5, (double) m.getBasePrice());
             ps.setString(6, m.getSynopsis());
-            ps.setString(8, m.getPoster());
-            ps.setInt(7, m.getId()); // ID film yang akan diubah
+            ps.setString(7, m.getPoster());
+            ps.setInt(8, m.getId()); // ID film yang akan diubah
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
