@@ -172,6 +172,7 @@
                   <thead class="bg-slate-50 text-xs uppercase font-bold text-slate-600 border-b">
                       <tr>
                           <th class="px-6 py-4">Judul Film</th>
+                          <th class="px-6 py-4">Poster</th>
                           <th class="px-6 py-4">Genre</th>
                           <th class="px-6 py-4">Sinopsis</th>
                           <th class="px-6 py-4">Durasi</th>
@@ -184,6 +185,14 @@
                       <% for (Movies m : mDao.getAll()) { %>
                       <tr class="hover:bg-slate-50/80 transition-colors">
                           <td class="px-6 py-4 font-bold text-slate-800"><%= m.getTitle() %></td>
+                          <td class="px-6 py-4 font-bold text-slate-800">
+                            <div class="w-12 h-16 overflow-hidden rounded-lg shadow-sm border border-slate-200">
+                                <img id="preview-poster-<%= m.getId() %>" 
+                                     src="${pageContext.request.contextPath}/images/poster/<%= m.getPoster() %>" 
+                                     class="w-full h-full object-cover hover:scale-110 transition-transform duration-300" 
+                                     alt="Poster">
+                            </div>
+                          </td>
                           <td class="px-6 py-4 font-medium text-slate-500"><%= m.getGenre() %></td>
                           <td class="px-6 py-4 text-slate-500"><%= m.getSynopsis() %></td>
                           <td class="px-6 py-4 font-medium text-slate-500"><%= m.getDurationMinutes() %> Menit</td>
@@ -214,9 +223,10 @@
                                     </button>
                                 </div>
 
-                                <form action="MovieServlet" method="POST" class="space-y-5">
+                                <form action="MovieServlet" method="POST" enctype="multipart/form-data" class="space-y-5">
                                     <input type="hidden" name="action" value="edit">
                                     <input type="hidden" name="id" value="<%= m.getId() %>">
+                                    <input type="hidden" name="old_poster" value="<%= m.getPoster() %>">
 
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <%-- Judul Film --%>
@@ -264,12 +274,38 @@
                                     </div>
                                     
                                     <%-- Poster --%>
-                                    <div class="md:col-span-2">
-                                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama File Poster</label>
-                                        <input type="text" name="poster" required 
-                                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-                                            placeholder="Contoh: poster-spiderman.jpg">
-                                        <p class="text-[10px] text-gray-400 mt-1">*Pastikan file sudah ada di folder images/poster/</p>
+                                    <div class="space-y-4 text-center">
+                                        <div class="flex justify-center">
+                                            <div class="relative w-32 h-44 bg-slate-100 rounded-xl overflow-hidden border border-slate-200 shadow-inner">
+                                                <% if (m.getPoster() != null && !m.getPoster().isEmpty()) { %>
+                                                    <img id="preview-poster-<%= m.getId() %>" 
+                                                         src="${pageContext.request.contextPath}/images/poster/<%= m.getPoster() %>" 
+                                                         class="w-full h-full object-cover" 
+                                                         alt="Poster Lama">
+                                                <% } else { %>
+                                                    <div id="placeholder-<%= m.getId() %>" class="flex items-center justify-center h-full text-slate-400">
+                                                        <i class="fas fa-image text-3xl"></i>
+                                                    </div>
+                                                    <img id="preview-poster-<%= m.getId() %>" class="w-full h-full object-cover hidden">
+                                                <% } %>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-1 flex justify-center px-4 py-4 border-2 border-slate-200 border-dashed rounded-2xl hover:border-blue-500 transition-all group relative">
+                                            <div class="space-y-1 text-center">
+                                                <svg class="mx-auto h-8 w-8 text-slate-400 group-hover:text-blue-500 transition-colors" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                </svg>
+                                                <div class="flex text-xs text-slate-600">
+                                                    <label for="foto-<%= m.getId() %>" class="relative cursor-pointer bg-transparent rounded-md font-bold text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                                                        <span>Ganti Poster</span>
+                                                        <input id="foto-<%= m.getId() %>" name="poster" type="file" class="sr-only" accept="image/*" 
+                                                               onchange="previewImage(this, '<%= m.getId() %>')">
+                                                    </label>
+                                                </div>
+                                                <p id="file-name-<%= m.getId() %>" class="text-[10px] text-blue-500 font-medium truncate max-w-[150px]"></p>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <%-- Tombol Aksi --%>
@@ -304,7 +340,7 @@
                     </button>
                 </div>
 
-                <form action="MovieServlet" method="POST" class="space-y-5">
+                <form action="MovieServlet" method="POST" enctype="multipart/form-data" class="space-y-5">
                     <input type="hidden" name="action" value="add">
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -348,6 +384,21 @@
                         <textarea name="synopsis" rows="4" 
                             class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all"
                             placeholder="Tuliskan ringkasan cerita film di sini..."></textarea>
+                    </div>
+                    
+                    <div class="space-y-1 text-center">
+                        <svg class="mx-auto h-12 w-12 text-slate-400 group-hover:text-blue-500 transition-colors" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div class="flex text-sm text-slate-600">
+                            <label for="foto" class="relative cursor-pointer bg-transparent rounded-md font-bold text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                                <span>Upload file</span>
+                                <input id="foto" name="poster" type="file" class="sr-only" accept="image/*" required onchange="showFileName(this)">
+                            </label>
+                            <p class="pl-1 text-slate-500">atau drag and drop</p>
+                        </div>
+                        <p id="file-name" class="text-xs text-blue-500 font-medium mt-2"></p>
+                        <p class="text-xs text-slate-500 italic">Format: PNG, JPG (Maks. 2MB)</p>
                     </div>
 
                     <div class="flex gap-4 mt-8">
@@ -435,9 +486,13 @@
                                                class="w-full px-4 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tipe (XXI/CGV/PREMIUM)</label>
-                                        <input type="text" name="type" value="<%= c.getCinemaType() %>" 
-                                               class="w-full px-4 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tipe Bioskop</label>
+                                        <select name="type" required 
+                                                class="w-full px-4 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                                            <option value="XXI" <%= "XXI".equals(c.getCinemaType()) ? "selected" : "" %>>XXI</option>
+                                            <option value="CGV" <%= "CGV".equals(c.getCinemaType()) ? "selected" : "" %>>CGV</option>
+                                            <option value="Cinepolis" <%= "Cinepolis".equals(c.getCinemaType()) ? "selected" : "" %>>Cinepolis</option>
+                                        </select>
                                     </div>
 
                                     <div class="flex gap-3 mt-6">
@@ -479,8 +534,14 @@
                         <input type="text" name="city" required class="w-full px-4 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tipe (XXI/CGV/etc)</label>
-                        <input type="text" name="type" class="w-full px-4 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tipe Bioskop</label>
+                        <select name="type" required 
+                                class="w-full px-4 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer">
+                            <option value="" disabled selected>Pilih Tipe</option>
+                            <option value="XXI">XXI</option>
+                            <option value="CGV">CGV</option>
+                            <option value="Cinepolis">Cinepolis</option>
+                        </select>
                     </div>
                     <button type="submit" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition-all mt-4">Simpan Bioskop</button>
                 </form>
@@ -504,6 +565,7 @@
                           <th class="px-6 py-4">Email</th>
                           <th class="px-6 py-4">Password</th>
                           <th class="px-6 py-4 text-center">Role</th>
+                          <th class="px-6 py-4 text-center">Aksi</th>
                       </tr>
                   </thead>
                   <tbody class="divide-y divide-slate-100">
@@ -518,7 +580,60 @@
                                   <%= u.getRole() %>
                               </span>
                           </td>
+                          <td class="px-6 py-4 text-right space-x-2">
+                              <button data-modal-target="editUserModal<%= u.getId() %>" data-modal-toggle="editUserModal<%= u.getId() %>" class="text-blue-600 hover:bg-blue-50 w-8 h-8 rounded-lg">
+                                  <i class="fas fa-edit"></i>
+                              </button>
+                              <a href="UserServlet?action=delete&id=<%= u.getId() %>" onclick="return confirm('Yakin ingin menghapus film ini?')" class="inline-flex items-center justify-center text-red-500 hover:bg-red-50 w-8 h-8 rounded-lg transition-colors">
+                                  <i class="fas fa-trash"></i>
+                              </a>
+                          </td>
                       </tr>
+                      <div id="editUserModal<%= u.getId() %>" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                        <div class="relative p-4 w-full max-w-md max-h-full">
+                            <div class="relative bg-white rounded-3xl shadow-xl p-8">
+                                <h3 class="text-xl font-bold text-slate-800 mb-6 text-center">Edit Data Pengguna</h3>
+                                <form action="UserServlet" method="POST" class="space-y-4">
+                                    <input type="hidden" name="action" value="update">
+                                    <input type="hidden" name="id" value="<%= u.getId() %>">
+
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nama Lengkap</label>
+                                        <input type="text" name="nama" value="<%= u.getNama() %>" required class="w-full px-4 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Username</label>
+                                            <input type="text" name="username" value="<%= u.getUsername() %>" required class="w-full px-4 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Role</label>
+                                            <select name="role" class="w-full px-4 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                                                <option value="user" <%= u.getRole().equals("user") ? "selected" : "" %>>User</option>
+                                                <option value="admin" <%= u.getRole().equals("admin") ? "selected" : "" %>>Admin</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Email</label>
+                                        <input type="email" name="email" value="<%= u.getEmail() %>" required class="w-full px-4 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Ganti Password (Kosongkan jika tidak diubah)</label>
+                                        <input type="password" name="password" class="w-full px-4 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+
+                                    <div class="flex gap-2 pt-4">
+                                        <button type="button" data-modal-toggle="editUserModal<%= u.getId() %>" class="w-full py-3 bg-slate-100 text-slate-600 font-bold rounded-xl">Batal</button>
+                                        <button type="submit" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg">Simpan</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                      </div>
                       <% } %>
                   </tbody>
               </table>
@@ -576,6 +691,7 @@
                             <th class="px-6 py-4">Film</th>
                             <th class="px-6 py-4">Bioskop</th>
                             <th class="px-6 py-4">Tanggal & Jam</th>
+                            <th class="px-6 py-4">Harga</th>
                             <th class="px-6 py-4 text-right">Aksi</th>
                         </tr>
                     </thead>
@@ -590,10 +706,79 @@
                                 <span class="font-medium"><%= s.get("date") %></span>
                                 <span class="ml-2 text-blue-600 font-bold"><%= s.get("time") %></span>
                             </td>
-                            <td class="px-6 py-4 text-right">
-                                <a href="ScheduleServlet?action=delete&id=<%= s.get("id") %>" class="text-red-500"><i class="fas fa-trash"></i></a>
+                            <td class="px-6 py-4 text-slate-500">Rp. <%= s.get("price") %></td>
+                            <td class="px-6 py-4 text-right space-x-2">
+                                <button data-modal-target="editScheduleModal<%= s.get("id") %>" data-modal-toggle="editScheduleModal<%= s.get("id") %>" class="text-blue-600 hover:bg-blue-50 w-8 h-8 rounded-lg transition-colors">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+
+                                <a href="ScheduleServlet?action=delete&id=<%= s.get("id") %>" 
+                                   onclick="return confirm('Yakin ingin menghapus jadwal ini?')" 
+                                   class="inline-flex items-center justify-center text-red-500 hover:bg-red-50 w-8 h-8 rounded-lg transition-colors">
+                                    <i class="fas fa-trash"></i>
+                                </a>
                             </td>
                         </tr>
+                        <div id="editScheduleModal<%= s.get("id") %>" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                            <div class="relative p-4 w-full max-w-md max-h-full">
+                                <div class="relative bg-white rounded-3xl shadow-2xl p-8">
+                                    <div class="flex items-center justify-between mb-6 border-b pb-4">
+                                        <h3 class="text-xl font-bold text-slate-800">Edit Jam Tayang</h3>
+                                        <button type="button" class="text-slate-400 hover:text-slate-900" data-modal-toggle="editScheduleModal<%= s.get("id") %>">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+
+                                    <form action="ScheduleServlet" method="POST" class="space-y-4">
+                                        <input type="hidden" name="action" value="update">
+                                        <input type="hidden" name="id" value="<%= s.get("id") %>">
+
+                                        <div>
+                                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Pilih Film</label>
+                                            <select name="movie_id" class="w-full px-4 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                                                <% for (Movies m : mDao.getAll()) { %>
+                                                    <option value="<%= m.getId() %>" <%= m.getTitle().equals(s.get("movie_title")) ? "selected" : "" %>>
+                                                        <%= m.getTitle() %>
+                                                    </option>
+                                                <% } %>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Pilih Bioskop</label>
+                                            <select name="studio_id" class="w-full px-4 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                                                <% for (Cinemas c : cDao.getAll()) { %>
+                                                    <option value="<%= c.getCinemaId() %>" <%= c.getName().equals(s.get("cinema_name")) ? "selected" : "" %>>
+                                                        <%= c.getName() %> (<%= c.getCity() %>)
+                                                    </option>
+                                                <% } %>
+                                            </select>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tanggal</label>
+                                                <input type="date" name="show_date" value="<%= s.get("date") %>" required class="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500">
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Jam Tayang</label>
+                                                <input type="time" name="show_time" value="<%= s.get("time") %>" required class="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500">
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Harga Tiket (Rp)</label>
+                                            <input type="number" name="price" value="<%= s.get("price") %>" required class="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500">
+                                        </div>
+
+                                        <div class="flex gap-3 pt-4">
+                                            <button type="button" data-modal-toggle="editScheduleModal<%= s.get("id") %>" class="flex-1 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl">Batal</button>
+                                            <button type="submit" class="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition-all">Simpan Perubahan</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                         <% } %>
                     </tbody>
                 </table>
@@ -654,6 +839,46 @@
       <%-- ... konten modal ... --%>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
+    <script>
+        // 1. Fungsi untuk Modal TAMBAH (Hanya menampilkan nama file)
+        function showFileName(input) {
+            if (input.files && input.files[0]) {
+                const name = input.files[0].name;
+                document.getElementById('file-name').textContent = "File terpilih: " + name;
+            }
+        }
+
+        // 2. Fungsi untuk Modal EDIT (Menampilkan Preview Gambar + Nama File)
+        function previewImage(input, id) {
+            // Ambil elemen berdasarkan ID unik film
+            const preview = document.getElementById('preview-poster-' + id);
+            const fileName = document.getElementById('file-name-' + id);
+            const placeholder = document.getElementById('placeholder-' + id);
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    // Set source gambar ke file yang baru dipilih
+                    preview.src = e.target.result;
+
+                    // Pastikan gambar terlihat (hapus class hidden jika ada)
+                    preview.classList.remove('hidden');
+
+                    // Jika ada placeholder (ikon gambar kosong), sembunyikan
+                    if (placeholder) {
+                        placeholder.classList.add('hidden');
+                    }
+                }
+
+                // Baca file gambar
+                reader.readAsDataURL(input.files[0]);
+
+                // Ganti teks nama file
+                fileName.textContent = "File ganti: " + input.files[0].name;
+            }
+        }
+    </script>
 </body>
 </html>

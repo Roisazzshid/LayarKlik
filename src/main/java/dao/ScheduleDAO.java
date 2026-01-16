@@ -59,16 +59,31 @@ public class ScheduleDAO {
         return list;
     }
 
-    // 3. Hapus Jadwal
-    public boolean delete(int id) {
+    // Tambahkan di dalam class ScheduleDAO
+    public void updateSchedule(Schedules s) {
+        String sql = "UPDATE schedules SET movie_id=?, studio_id=?, show_date=?, show_time=?, price=? WHERE schedule_id=?";
+        try (Connection conn = util.KoneksiDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, s.getMovieId());
+            ps.setInt(2, s.getStudioId());
+            ps.setDate(3, s.getShowDate());
+            ps.setTime(4, s.getShowTime());
+            ps.setDouble(5, s.getPrice());
+            ps.setInt(6, s.getScheduleId());
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteSchedule(int id) {
         String sql = "DELETE FROM schedules WHERE schedule_id = ?";
-        try (Connection conn = KoneksiDB.getConnection();
+        try (Connection conn = util.KoneksiDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
+            ps.executeUpdate();
+        } catch (Exception e) {
             e.printStackTrace();
-            return false;
         }
     }
     
