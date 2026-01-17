@@ -87,7 +87,7 @@
                         </div>
                         
                         <div class="p-4 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-slate-900">
-                            <img src="${pageContext.request.contextPath}/images/erd.png" 
+                            <img src="${pageContext.request.contextPath}/images/erd.jpeg" 
                                  alt="ERD Database Bioskop" 
                                  class="w-full h-auto object-contain hover:scale-105 transition duration-500">
                         </div>
@@ -124,7 +124,7 @@
 
         <div class="absolute inset-0 flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing z-[101]" id="modalImageContainer">
             <img id="modalImage" 
-                 src="${pageContext.request.contextPath}/images/erd.png" 
+                 src="${pageContext.request.contextPath}/images/erd.jpeg" 
                  class="max-w-[90%] max-h-[90%] object-contain transition-transform duration-200 ease-out origin-center"
                  draggable="false">
         </div>
